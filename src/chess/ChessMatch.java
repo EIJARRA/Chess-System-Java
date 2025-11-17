@@ -2,8 +2,10 @@ package chess;
 
 import boardlayer.Board;
 import boardlayer.Position;
+import chess.ChessPosition;
 import chess.pieces.King;
 import chess.pieces.Rook;
+import boardlayer.Piece;
 
 public class ChessMatch {
 
@@ -16,14 +18,18 @@ public class ChessMatch {
 
     private void initialSetup() {
 
-        board.placePiece(new Rook(board, Color.WHITE), new Position(7, 0));
-        board.placePiece(new King(board, Color.WHITE), new Position(7, 4));
-        board.placePiece(new Rook(board, Color.WHITE), new Position(7, 7));
+        placeNewPiece('a', 1, new Rook(board, Color.WHITE));
+        placeNewPiece('e', 1, new King(board, Color.WHITE));
+        placeNewPiece('h', 1, new Rook(board, Color.WHITE));
 
+        placeNewPiece('a', 8, new Rook(board, Color.BLACK));
+        placeNewPiece('e', 8, new King(board, Color.BLACK));
+        placeNewPiece('h', 8, new Rook(board, Color.BLACK));
+    }
 
-        board.placePiece(new Rook(board, Color.BLACK), new Position(0, 0));
-        board.placePiece(new King(board, Color.BLACK), new Position(0, 4));
-        board.placePiece(new Rook(board, Color.BLACK), new Position(0, 7));
+    private void placeNewPiece(char column, int row, ChessPiece piece) {
+
+        board.placePiece(piece, new ChessPosition(column, row).toPosition());
     }
 
     public ChessPiece[][] getPieces() {
@@ -35,5 +41,36 @@ public class ChessMatch {
             }
         }
         return mat;
+    }
+
+    public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+
+        Position source = sourcePosition.toPosition();
+        Position target = targetPosition.toPosition();
+
+        validateSourcePosition(source);
+
+        Piece capturedPiece = makeMove(source, target);
+
+        return (ChessPiece)capturedPiece;
+    }
+
+    private Piece makeMove(Position source, Position target) {
+
+        Piece p = board.removePiece(source);
+
+        Piece capturedPiece = board.removePiece(target);
+
+        board.placePiece(p, target);
+
+        return capturedPiece;
+    }
+
+    private void validateSourcePosition(Position source) {
+
+        if (!board.thereIsAPiece(source)) {
+            throw new ChessException("There is no piece on source position");
+        }
+
     }
 }
