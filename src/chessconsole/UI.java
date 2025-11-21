@@ -1,14 +1,20 @@
 package chessconsole;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+
+import chess.ChessMatch;
 import chess.ChessPiece;
-import chess.Color;
 import chess.ChessPosition;
+import chess.Color;
+import boardlayer.Piece;
 
 public class UI {
 
-    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
@@ -19,22 +25,28 @@ public class UI {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
+
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+
     public static ChessPosition readChessPosition(Scanner sc) {
         try {
-
             String s = sc.nextLine().toLowerCase();
-
             char column = s.charAt(0);
-
             int row = Integer.parseInt(s.substring(1));
-
             return new ChessPosition(column, row);
         }
-
         catch (RuntimeException e) {
-
             throw new InputMismatchException("Error reading ChessPosition. Valid values are from a1 to h8.");
         }
+    }
+
+    public static void printMatch(ChessMatch chessMatch, List<Piece> captured) {
+        printBoard(chessMatch.getPieces());
+        System.out.println();
+        printCapturedPieces(captured);
+        System.out.println();
+        System.out.println("Turn: " + chessMatch.getTurn());
+        System.out.println("Waiting player: " + chessMatch.getCurrentPlayer());
     }
 
     public static void printBoard(ChessPiece[][] pieces) {
@@ -52,7 +64,6 @@ public class UI {
         for (int i = 0; i < pieces.length; i++) {
             System.out.print((8 - i) + " ");
             for (int j = 0; j < pieces[i].length; j++) {
-
                 printPiece(pieces[i][j], possibleMoves[i][j]);
             }
             System.out.println();
@@ -89,6 +100,21 @@ public class UI {
             }
         }
         System.out.print(" ");
+    }
+
+    private static void printCapturedPieces(List<Piece> captured) {
+        List<Piece> white = captured.stream().filter(x -> ((ChessPiece)x).getColor() == Color.WHITE).collect(Collectors.toList());
+        List<Piece> black = captured.stream().filter(x -> ((ChessPiece)x).getColor() == Color.BLACK).collect(Collectors.toList());
+
+        System.out.println("Captured pieces:");
+        System.out.print("White: ");
+        System.out.print(ANSI_WHITE);
+        System.out.println(Arrays.toString(white.toArray()));
+        System.out.print(ANSI_RESET);
+        System.out.print("Black: ");
+        System.out.print(ANSI_YELLOW);
+        System.out.println(Arrays.toString(black.toArray()));
+        System.out.print(ANSI_RESET);
     }
 
     public static void clearScreen() {
